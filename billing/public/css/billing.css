@@ -1,0 +1,226 @@
+body
+{
+    background: url(/images/bg.png);
+    font-family: Helvetica, sans-serif;
+    font-size: 10pt;
+}
+
+.container {
+    font-size: 11pt;
+    font-family: Helvetica, sans-serif;
+    padding: 5px;
+    line-height: 28px;
+}
+
+/* begin various text types */
+div.leftnav
+{
+    padding: 2px 0px 2px 5px;
+}
+
+#comments {
+    width: 420px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+option.active { color: #000; }
+option.inactive { color: #C97063; }
+
+.error-message
+{
+    text-align: left;
+    color: #990000;
+    font-size: 100%;
+    font-weight: normal;
+    font-weight: bold;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+.e404-main
+{
+    color: #B0A772;
+    text-align: center;
+    margin-top: 3%;
+    margin-right: auto;
+    margin-bottom: 3%;
+    margin-left: auto;
+}
+
+.colhdr
+{
+    color: #515874;
+    background-color: #E8EBF4;
+    text-align: center;
+    font-style: normal;
+    font-weight: bold;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+tr.total,div.total
+{
+    background-color: #F0EECE;
+    text-align: center;
+    font-style: normal;
+    font-weight: bold;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+td.total
+{
+    color: #991111;
+    background-color: #F0EECE;
+    text-align: right;
+    font-style: normal;
+    font-weight: bold;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+.odd { background-color: #F1F1F1; }
+.even { background-color: #E8EAFA; }
+
+input.hours { width: 48px; background-color: #FAFAFA; }
+
+.mainmenu
+{
+    color: #010199;
+    background-color: #f0f0f0;
+    border: 1px solid #cecece;
+    padding: 2px 5px 2px 5px;
+    text-align: center;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    cursor: default;
+}
+
+.mainmenu:hover
+{
+    color: #990101;
+    background-color: #d9d9d9;
+    border: 1px solid #cc0101;
+    cursor: pointer;
+    cursor: hand;
+}
+/* end various text types */
+
+/*
+must be in this order:
+a:link, a:visited, a:hover, a:active
+begin anchors
+*/
+a:link,
+a:visited,
+a:active
+{
+    color: #0000cc;
+    text-decoration: none;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+a:hover
+{
+    color: #990000;
+    background-color: #f9f9e0;
+}
+/* end anchors */
+
+/* begin table elements */
+table
+{
+    background-color: #ffffff;
+    padding: 1px;
+}
+
+table.maincontent
+{
+    border: 1px solid #c1c1c1;
+    margin: auto;
+    text-align: left;
+}
+
+table.boxcontent, div.boxcontent
+{
+    border: 1px solid #aaa;
+    color: #3a3934;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+td.prompt
+{
+    background-color: #E8EBF4;
+    text-align: right;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+td.data
+{
+    text-align: left;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+input.lookup:focus,
+select.lookup:focus
+{
+    color: #000099;
+    background-color: #ffff99;
+}
+
+textarea:focus
+{
+    color: #000099;
+    background-color: #ffff99;
+}
+/* end table elements */
+
+/* begin buttons */
+.button
+{
+    border: 1px 5px 5px 1px solid #999999;
+    color: #111199;
+    background-color: #e7e7e7;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    padding: 1px 2px 1px 2px;
+    height: 25px;
+}
+
+.button:hover
+{
+    color: #990000;
+    background-color: #f9f9e0;
+}
+
+button.mainmenu
+{
+    color: #010199;
+    background-color: #f0f0f0;
+    border: 1px solid #cecece;
+    padding: 2px 5px 2px 5px;
+    text-align: center;
+    font-style: normal;
+    font-weight: normal;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    cursor: default;
+}
+
+button.mainmenu:hover
+{
+    color: #990101;
+    background-color: #f9f9e0;
+    border: 1px solid #cc0101;
+    cursor: default;
+}
+/* end buttons */

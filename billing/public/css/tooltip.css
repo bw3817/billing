@@ -1,0 +1,27 @@
+div.tooltip
+{
+	margin: 5px;
+	border: solid 2px #cacaca;
+	width: 320px;
+}
+
+div.tooltip-title
+{
+	text-align: center;
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #990101;
+	background-color: #f0f0f0;
+	padding: 20px 10px 20px 10px;
+}
+
+div.tooltip-content
+{
+	text-align: left;
+	font-size: 1.05em;
+	font-weight: normal;
+	line-height: 1.2em;
+	color: #010199;
+	background-color: #f0f0f0;
+	padding: 20px 10px 20px 10px;
+}

@@ -1,0 +1,203 @@
+#!/usr/bin/env python
+#----------------------------------------------------------------------
+# Author:            Brian Wolf
+# Company:           Activus Technologies
+# Date:              2014.02.21
+# Module:            invoice.py
+# Description:       Generates an invoice
+#
+# Modifications:
+#
+#
+#----------------------------------------------------------------------
+
+
+# built-ins
+import os
+from ConfigParser import SafeConfigParser
+from datetime import datetime, date, timedelta
+from decimal import Decimal
+
+# reportlab
+from reportlab.platypus import (
+    SimpleDocTemplate, Table, TableStyle,
+    PageBreak, Spacer, Image
+)
+from reportlab.platypus.paragraph import Paragraph
+#from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.rl_config import defaultPageSize
+from reportlab.lib.units import inch
+
+
+class GenInvoice(object):
+    def __init__(self, customer, hours, **kwargs):
+        self.PAGE_HEIGHT = defaultPageSize[1]
+        self.PAGE_WIDTH = defaultPageSize[0]
+        self.styles = getSampleStyleSheet()
+        self.customer = customer
+        self.hours = hours
+        self.invoice_no = self.gen_invoice_no()
+        for k,v in kwargs.items():
+            setattr(self, k, v)
+        self.logo_dir = '/home/brian/Documents/logo/activus'
+        self.logo_fn = 'activus_logo_2011.png'
+        self.pageinfo = 'Activus Invoice '.format(self.invoice_no)
+
+    def first_page(self, canvas, doc):
+        canvas.setAuthor = 'Activus Technologies'
+        canvas.setTitle = 'Activus Technologies Invoice'
+        canvas.setSubject = 'Activus Technologies Invoice'
+        canvas.saveState()
+        canvas.setFont('Helvetica', 16)
+        width = self.PAGE_WIDTH / 2.0
+        height = self.PAGE_HEIGHT - 1.7 * inch
+        canvas.drawCentredString(width, height, 'ACTIVUS TECHNOLOGIES')
+        canvas.drawImage(os.path.join(self.logo_dir, self.logo_fn), width - 1.7*inch, height)
+        canvas.setFont('Helvetica', 11)
+        line_height = 0.25 * inch
+        for a,t in enumerate(('3817 Menlo Drive', 'Baltimore, MD 21215', '410-367-2958')):
+            height -= line_height
+            canvas.drawCentredString(width, height, t)
+        height -= line_height
+        canvas.drawCentredString(width, height, 'Invoice for {0}'.format(self.customer.cust_nm))
+        canvas.drawString(inch, 0.75 * inch, "Page 1: %s" % self.pageinfo)
+        canvas.restoreState()
+
+    def later_pages(self, canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 11)
+        canvas.drawString(inch, 0.75 * inch, "Page %d %s" % (doc.page, self.pageinfo))
+        canvas.restoreState()
+
+    def gen_invoice_no(self):
+        d = datetime.now()
+        a = d.strftime('%y%j')
+        return a + self.customer.abrv.upper()
+
+    def make(self):
+        filename = "{0}.pdf".format(self.invoice_no)
+        config = SafeConfigParser()
+        config.read('development.ini')
+        billing_dir = config.get('app:main', 'billing.invoices_dir')
+        path = os.path.join(billing_dir, filename)
+        doc = SimpleDocTemplate(path)
+
+        # initial space from top of page
+        story = [Spacer(1,2*inch)]
+        #style = self.styles["Normal"]
+
+        # spacer used going forward
+        spacer = Spacer(1,0.3*inch)
+
+        # set colors
+        HEADER_COLOR = '#E9F0F7'
+        PRIMARY_COLOR = '#FFFFFF'
+        ALT_COLOR = '#F1F1F1'
+        BOX_COLOR = '#111'
+        COLORS = [ALT_COLOR, PRIMARY_COLOR]
+
+        # customer
+        customer_style = [
+            ('BACKGROUND', (1, 0), (1, 0), HEADER_COLOR),
+            ('BACKGROUND', (3, 0), (3, 0), HEADER_COLOR),
+            ('BACKGROUND', (5, 0), (5, 0), HEADER_COLOR),
+            ('BOX', (0, 0), (-1, -1), 0.25, BOX_COLOR)
+        ]
+        customer_data = [
+            (
+                'Rate:', '{0:.2f}'.format(self.customer.rate),
+                'Invoice:', self.invoice_no,
+                'Date:', date.today().strftime('%b %-d, %Y')
+            )
+        ]
+        t = Table(customer_data, style=customer_style)
+        story.append(t)
+        story.append(spacer)
+
+        # summary
+        print '\n', self.hours, '\n'
+        total_hours = sum([h.hrs or 0 for h in self.hours])
+        total_expenses = sum([h.amt_exp or 0 for h in self.hours])
+        if self.maximum:
+            total_amount = Decimal(self.maximum)
+        else:
+            total_amount = sum([self.customer.rate * (h.hrs or 0)
+                                for h in self.hours])
+            total_amount += total_expenses
+            if self.discount:
+                total_amount -= Decimal(self.discount)
+        summary = [
+            ('Hours','Amount Due'),
+            (total_hours, '{0:.2f} USD'.format(total_amount))
+        ]
+        summary_style = [
+            ('FONT', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'RIGHT'),
+            ('BACKGROUND', (0, 0), (1, 0), HEADER_COLOR),
+            ('BOX', (0, 0), (-1, -1), 0.25, BOX_COLOR)
+        ]
+        t = Table(summary, style=summary_style)
+        story.append(t)
+        story.append(spacer)
+
+        # details
+        data_style = [
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (2, 1), (2, -1), 'RIGHT'),
+            ('ALIGN', (3, 1), (3, -1), 'RIGHT'),
+            ('VALIGN', (0, 1), (-1, -1), 'TOP'),
+            ('BACKGROUND', (0, 0), (-1, 0), HEADER_COLOR),
+            ('BOX', (0, 0), (-1, -1), 0.25, BOX_COLOR)
+        ]
+
+        data = []
+        for n, h in enumerate(self.hours):
+            # positive hours means use hours, not expense
+            if h.hrs and h.hrs != 0:
+                data.append((
+                    h.performed.strftime('%m/%d/%Y'),
+                    Paragraph(
+                    self.combine(h.project_name, h.comments), self.styles["BodyText"]),
+                    '{0:.2f}'.format(h.hrs),
+                    '{0:.2f}'.format(self.customer.rate * h.hrs or h.amt_exp),
+                ))
+            # no hours implies an expense rather than hours
+            else:
+                data.append((
+                    h.performed.strftime('%m/%d/%Y'),
+                    Paragraph(
+                    self.combine(h.project_name, h.comments), self.styles["BodyText"]),
+                    '',
+                    '{0:.2f}'.format(h.amt_exp),
+                ))
+            # set background color for alternating rows
+            if n > 0:
+                data_style.append(('BACKGROUND', (0, n), (-1, n), COLORS[n % 2]))
+
+        if self.discount:
+            discount = (
+                datetime.now().strftime('%m/%d/%Y'),
+                Paragraph('Courtesy Discount', self.styles["BodyText"]),
+                '',
+                '({0:.2f})'.format(Decimal(self.discount)))
+            data.append(discount)
+            # set background color for alternating rows
+            data_style.append(('BACKGROUND', (0, len(data)), (-1, len(data)), COLORS[len(data) % 2]))
+
+        data.insert(0, ('Date','Description','Hours','Amount'))
+        col_widths = (0.8 * inch, 3.9 * inch, 0.8 * inch, 1.0 * inch)
+        t = Table(data, style=data_style, colWidths=col_widths)
+        story.append(t)
+
+        # build PDF
+        doc.build(story, onFirstPage=self.first_page, onLaterPages=self.later_pages)
+        return path
+
+    def combine(self, project, comments=None):
+        if (comments or "").strip() == "":
+            return project
+        else:
+            return project + ": " + comments

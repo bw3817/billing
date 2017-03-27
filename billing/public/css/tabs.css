@@ -1,0 +1,48 @@
+#tabs
+{
+	position: relative;
+	top: 5px;
+	height: 18px;
+	list-style: none;
+	cursor: default;
+	margin-left: -42px;
+}
+
+#tabs li
+{
+	float: left;
+}
+
+#tabs a
+{
+	color: #010199;
+	background-color: #f0f0f0;
+	font-weight: normal;
+	border: 1px solid #cecece;
+	float: left;
+	padding: 2px 8px 2px 8px;
+	margin-left: 3px;
+	text-align: center;
+	text-decoration: none;
+}
+
+#tabs a.active-tab
+{
+	color: #990101;
+	background-color: #d9d9d9;
+	border: 1px solid #cc0101;
+	padding: 2px 8px 2px 8px;
+}
+
+.info
+{
+	clear: both;
+	display: none;
+	background-color: #fefefe;
+	padding: 5px;
+}
+
+.info.active-tab-body
+{
+	display: block;
+}

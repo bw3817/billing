@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/activus_billing/!svn/ver/2/billing.egg-info
+END
+SOURCES.txt
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/activus_billing/!svn/ver/2/billing.egg-info/SOURCES.txt
+END
+top_level.txt
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/activus_billing/!svn/ver/2/billing.egg-info/top_level.txt
+END
+PKG-INFO
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/activus_billing/!svn/ver/2/billing.egg-info/PKG-INFO
+END
+entry_points.txt
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/activus_billing/!svn/ver/2/billing.egg-info/entry_points.txt
+END
+dependency_links.txt
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/activus_billing/!svn/ver/2/billing.egg-info/dependency_links.txt
+END
+not-zip-safe
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/activus_billing/!svn/ver/2/billing.egg-info/not-zip-safe
+END
+paster_plugins.txt
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/activus_billing/!svn/ver/2/billing.egg-info/paster_plugins.txt
+END
+requires.txt
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/activus_billing/!svn/ver/2/billing.egg-info/requires.txt
+END
