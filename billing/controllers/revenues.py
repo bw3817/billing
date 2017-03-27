@@ -194,8 +194,7 @@ class RevenuesController(BasePlusController):
     def _getresults(self):
         # pull revenues that match criteria
         qry = self.db.query(model.Revenue.id, model.Revenue.total, model.Revenue.dep_dt)
-        if c.cust_id != 'all':
-            qry = qry.filter(model.RevenueDetail.cust_id == c.cust_id)
+        qry = qry.join(model.RevenueDetail, model.RevenueDetail.rev_id == model.Revenue.id)
         qry = qry.filter(model.Revenue.dep_dt >= c.start_dt.strftime(self.FMT))
         qry = qry.filter(model.Revenue.dep_dt <= c.end_dt.strftime(self.FMT))
         if c.cust_id != 'all':

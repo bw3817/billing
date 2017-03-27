@@ -4,10 +4,6 @@ import os
 import simplejson as json
 from datetime import datetime, timedelta
 
-# sqlalchemy
-#from sqlalchemy import or_, and_, not_, func
-#from sqlalchemy import inspect
-
 # pylons
 from pylons import config, url, request, response, session, tmpl_context as c
 from pylons.controllers.util import abort, redirect
