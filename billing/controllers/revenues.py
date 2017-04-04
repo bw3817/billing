@@ -1,6 +1,6 @@
 # controller: revenues
-from pylons import config, url, request, response, session, tmpl_context as c
-from pylons.controllers.util import abort, redirect
+from pylons import config, url, request, session, tmpl_context as c
+from pylons.controllers.util import redirect
 from billing.lib.baseplus import BasePlusController, render
 import billing.model as model
 import billing.lib.helpers as h
@@ -9,12 +9,10 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal
 
 # SQL functions
-from sqlalchemy import or_, and_, not_, func
+from sqlalchemy import or_, and_, not_, func, distinct
 
 # form handling
 import formencode
-from pylons.decorators import validate
-from pylons.decorators.rest import restrict
 
 
 class RevenueForm(formencode.Schema):
@@ -199,6 +197,7 @@ class RevenuesController(BasePlusController):
         qry = qry.filter(model.Revenue.dep_dt <= c.end_dt.strftime(self.FMT))
         if c.cust_id != 'all':
             qry = qry.filter(model.RevenueDetail.cust_id == c.cust_id)
+        qry = qry.distinct()
         qry = qry.order_by(model.Revenue.dep_dt)
         revenues = qry.all()
 
