@@ -116,7 +116,6 @@ class GenInvoice(object):
         story.append(spacer)
 
         # summary
-        print '\n', self.hours, '\n'
         total_hours = sum([h.hrs or 0 for h in self.hours])
         total_expenses = sum([h.amt_exp or 0 for h in self.hours])
         if self.maximum:

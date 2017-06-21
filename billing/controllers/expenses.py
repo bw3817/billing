@@ -79,8 +79,8 @@ class ExpensesController(BasePlusController):
             c.start_dt = date.today().replace(day=1).strftime(ISO_DATE_FORMAT)
         if c.end_dt == '':
             c.end_dt = self._endofmonth(c.start_dt).strftime(ISO_DATE_FORMAT)
-        cat_id = request.params.get('cat_id')
-        vend_id = request.params.get('vend_id')
+        cat_id = request.params.get('cat_id', 'all')
+        vend_id = request.params.get('vend_id', 'all')
 
         # pull expenses that match criteria
         qry = self.db.query(model.Expense)

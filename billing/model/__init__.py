@@ -221,8 +221,6 @@ class Hours(Base):
     project_id = Column(Integer, ForeignKey('projects.id'))
     hrs = Column(Numeric(10,2), nullable=True)
     billing_status = Column(String(1), default='U')
-    #billed = Column(Boolean, default=False)
-    #paid = Column(Boolean, default=False)
     performed = Column(Date)
     cre_dt = Column(TIMESTAMP)
     mod_dt = Column(TIMESTAMP, default=datetime.now())
