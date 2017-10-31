@@ -296,7 +296,7 @@ function GetHours()
             tbx.id = "hrs." + json_data.hours[r].id;
             tbx.name = "hrs." + json_data.hours[r].id;
             tbx.className = "hours";
-            tbx.value = json_data.hours[r].hrs.toFixed(2);
+            tbx.value = json_data.hours[r].hrs.toFixed(3);
             td.appendChild(tbx);
             tr.appendChild(td);
             total_hours += json_data.hours[r].hrs;
@@ -331,7 +331,7 @@ function GetHours()
       td = tr.insertCell(colcnt);
       td.align = "right";
       td.colSpan = 6;
-      node = document.createTextNode(total_hours.toFixed(2));
+      node = document.createTextNode(total_hours.toFixed(3));
       td.appendChild(node);
 
       colcnt += 1;

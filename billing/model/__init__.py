@@ -219,7 +219,7 @@ class Hours(Base):
     id = Column(Integer, primary_key=True)
     cust_id = Column(Integer, ForeignKey('customers.id'))
     project_id = Column(Integer, ForeignKey('projects.id'))
-    hrs = Column(Numeric(10,2), nullable=True)
+    hrs = Column(Numeric(10,3), nullable=True)
     billing_status = Column(String(1), default='U')
     performed = Column(Date)
     cre_dt = Column(TIMESTAMP)

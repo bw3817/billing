@@ -160,7 +160,7 @@ class GenInvoice(object):
                     h.performed.strftime('%m/%d/%Y'),
                     Paragraph(
                     self.combine(h.project_name, h.comments), self.styles["BodyText"]),
-                    '{0:.2f}'.format(h.hrs),
+                    '{0:.3f}'.format(h.hrs),
                     '{0:.2f}'.format(self.customer.rate * h.hrs or h.amt_exp),
                 ))
             # no hours implies an expense rather than hours
