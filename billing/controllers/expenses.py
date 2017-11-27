@@ -43,14 +43,17 @@ class ExpensesController(BasePlusController):
         c.end_dt = request.params.get('end_dt','')
         c.cat_id = request.params.get('cat_id')
         c.vend_id = request.params.get('vend_id')
+
+        # categories
         categories = self.db.query(model.Category).filter(model.Category.status == True).order_by(model.Category.cat_nm).all()
+
         # get vendors
         qry = self.db.query(model.Vendor)
         qry = qry.filter(model.Vendor.status == True)
         if c.cat_id is not None:
             qry = qry.filter(model.Vendor.cat_id == c.cat_id)
-        qry = qry.order_by(model.Vendor.vend_nm).all()
-        vendors = self.db.query(model.Vendor).filter(model.Vendor.status == True).order_by(model.Vendor.vend_nm).all()
+        qry = qry.order_by(model.Vendor.vend_nm)
+        vendors = qry.all()
         return render('/expenses/report.mako', extra_vars={'vendors':vendors, 'categories':categories})
 
 
@@ -72,7 +75,7 @@ class ExpensesController(BasePlusController):
 
 
     def results(self):
-        # get criteria; defaults to: 1st to last day of current month
+        # get criteria; defaults to: first day to last day of current month
         c.start_dt = request.params['start_dt']
         c.end_dt = request.params['end_dt']
         if c.start_dt == '':
@@ -85,7 +88,8 @@ class ExpensesController(BasePlusController):
         # pull expenses that match criteria
         qry = self.db.query(model.Expense)
         if cat_id is not None:
-            qry = qry.join((model.Vendor, model.Vendor.id == model.Expense.vend_id), (model.Category, model.Category.id == model.Vendor.cat_id))
+            qry = qry.join(model.Vendor, model.Vendor.id == model.Expense.vend_id)
+            qry = qry.join(model.Category, model.Category.id == model.Vendor.cat_id)
             qry = qry.add_column(model.Vendor.vend_nm)
             if cat_id != 'all':
                 qry = qry.filter(model.Category.id == cat_id)

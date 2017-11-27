@@ -1,4 +1,5 @@
 .directory
 .idea/
 *.pyc
+*/.svn/*
 development.ini
