@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal
 
 # SQL functions
-from sqlalchemy import or_, and_, not_, func, distinct
+from sqlalchemy import or_, and_, not_, func, distinct, extract
 
 # form handling
 import formencode
@@ -253,3 +253,18 @@ class RevenuesController(BasePlusController):
                 setattr(c, field, self._str2dt(getattr(c, field)))
         return render('/revenues/results.mako')
 
+
+    def summary(self):
+        c.rev_year = request.params['rev_year']
+
+        qry = self.db.query(model.Customer)
+        qry = qry.join(model.RevenueDetail, model.RevenueDetail.cust_id == model.Customer.id)
+        qry = qry.filter(extract('year', model.RevenueDetail.rcv_dt) == c.rev_year)
+        qry = qry.filter(model.Customer.status == True)
+        qry = qry.add_column(model.Customer.id)
+        qry = qry.add_column(model.Customer.cust_nm.label('name'))
+        qry = qry.add_column(func.sum(model.RevenueDetail.amt).label('amount'))
+        qry = qry.group_by(model.Customer.id)
+        c.customers = qry.order_by(model.Customer.cust_nm).all()
+
+        return render('/revenues/summary.mako')

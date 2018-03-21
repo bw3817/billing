@@ -1,8 +1,8 @@
 <%doc>
 ========================================
-    Template: revenues/revenues.mako
+    Template: revenues/summary.mako
     Author: Brian Wolf
-    Date: 2010.01.05
+    Date: 2018.01.30
 ========================================
 </%doc>
 <%inherit file="/revenues/index.mako"/>
@@ -17,15 +17,17 @@
 
 ##--------------------------------------------------------------------------------
 
+<legend>Revenue Summary for ${c.rev_year}</legend>
+
 <table style="border: 1px solid #aaa; width: 100%">
   <tr class="colhdr">
-    <th>ID</th>
-    <th>Category</th>
+    <th>Customer</th>
+    <th>Amount</th>
   </tr>
-  %for n,category in enumerate(categories):
+  %for n,customer in enumerate(c.customers):
   <tr style="background-color: ${utils.COLORS[n % 2]}">
-    <td>${category.id}</td>
-    <td><a href="/categories/view/${category.id}">${category.cat_nm}</a></td>
+    <td>${customer.name}</td>
+    <td>${customer.amount}</td>
   </tr>
   %endfor
 </table>
