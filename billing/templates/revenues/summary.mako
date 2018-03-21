@@ -34,4 +34,8 @@
     <td>${customer.amount}</td>
   </tr>
   %endfor
+  <tr class="colhdr">
+    <td colspan="2">Total</td>
+    <td>${c.revenue_total}</td>
+  </tr>
 </table>

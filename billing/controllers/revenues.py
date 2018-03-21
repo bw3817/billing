@@ -267,4 +267,8 @@ class RevenuesController(BasePlusController):
         qry = qry.group_by(model.Customer.id)
         c.customers = qry.order_by(model.Customer.cust_nm).all()
 
+        qry = self.db.query(func.sum(model.RevenueDetail.amt).label('total'))
+        qry = qry.filter(extract('year', model.RevenueDetail.rcv_dt) == c.rev_year)
+        c.revenue_total = qry.scalar()
+
         return render('/revenues/summary.mako')
