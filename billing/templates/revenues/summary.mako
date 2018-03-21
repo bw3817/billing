@@ -13,6 +13,8 @@
 
 <%
   utils = Utils()
+  def checkmark(status):
+    return h.literal('&#x2713;') if status else ''
 %>
 
 ##--------------------------------------------------------------------------------
@@ -22,11 +24,13 @@
 <table style="border: 1px solid #aaa; width: 100%">
   <tr class="colhdr">
     <th>Customer</th>
+    <th>Active</th>
     <th>Amount</th>
   </tr>
   %for n,customer in enumerate(c.customers):
   <tr style="background-color: ${utils.COLORS[n % 2]}">
     <td>${customer.name}</td>
+    <td align="center">${checkmark(customer.status)}</td>
     <td>${customer.amount}</td>
   </tr>
   %endfor
