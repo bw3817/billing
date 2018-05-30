@@ -85,7 +85,6 @@ class GenInvoice(object):
 
         # initial space from top of page
         story = [Spacer(1,2*inch)]
-        #style = self.styles["Normal"]
 
         # spacer used going forward
         spacer = Spacer(1,0.3*inch)
@@ -127,7 +126,7 @@ class GenInvoice(object):
             if self.discount:
                 total_amount -= Decimal(self.discount)
         summary = [
-            ('Hours','Amount Due'),
+            ('Hours', 'Amount Due'),
             (total_hours, '{0:.2f} USD'.format(total_amount))
         ]
         summary_style = [
@@ -160,7 +159,7 @@ class GenInvoice(object):
                     h.performed.strftime('%m/%d/%Y'),
                     Paragraph(
                     self.combine(h.project_name, h.comments), self.styles["BodyText"]),
-                    '{0:.3f}'.format(h.hrs),
+                    '{0:.2f}'.format(h.hrs),
                     '{0:.2f}'.format(self.customer.rate * h.hrs or h.amt_exp),
                 ))
             # no hours implies an expense rather than hours

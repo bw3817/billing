@@ -144,9 +144,9 @@ class InvoicesController(BasePlusController):
 
         # generate invoice
         g = GenInvoice(customer, hours, maximum=maximum, discount=discount)
-        fullpath = g.make()
-        path,filename = os.path.split(fullpath)
-        fn,ext = os.path.splitext(filename)
+        full_path = g.make()
+        path, filename = os.path.split(full_path)
+        fn, ext = os.path.splitext(filename)
         info = dict(status=1, invoice=fn)
 
         # send response to browser
