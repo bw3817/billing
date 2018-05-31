@@ -1,8 +1,8 @@
 <%doc>
 ========================================
-	Template: login.mako
-	Author: Brian Wolf
-	Date: 2009.11.11
+    Template: login.mako
+    Author: Brian Wolf
+    Date: 2009.11.11
 ========================================
 </%doc>
 <%!
@@ -43,25 +43,25 @@ function BtnClicked(obj)
 <form name="frm_login" method="post" action="/site/loginsubmit" enctype="multipart/form-data">
 <input type="hidden" id="btn" name="btn" value=""/>
 <table align="center" style="background-color: #E5EAF7; border: 1px solid #330000; padding: 5px; width: 280px;">
-	<tr align="center">
-		<td class="error-message" colspan="2">${message}</td>
-	</tr>
+    <tr align="center">
+        <td class="error-message" colspan="2">${message}</td>
+    </tr>
 
-	<tr align="center">
-		<td class="prompt" width="100">User ID:</td>
-		<td><input class="lookup" type="text" id="usrnam" name="usrnam" value="${session.get('usrnam')}" required="true" tabindex="10" maxlength="5" /></td>
-	</tr>
+    <tr align="center">
+        <td class="prompt" width="100">User ID:</td>
+        <td><input class="lookup" type="text" id="usrnam" name="usrnam" value="${session.get('usrnam')}" required="true" tabindex="10" maxlength="5" /></td>
+    </tr>
 
-	<tr align="center">
-		<td class="prompt" width="100">Password:</td>
-		<td class="info"><input class="lookup" type="password" id="pwd" name="pwd" required="true" tabindex="20" /></td>
-	</tr>
+    <tr align="center">
+        <td class="prompt" width="100">Password:</td>
+        <td class="info"><input class="lookup" type="password" id="pwd" name="pwd" required="true" tabindex="20" /></td>
+    </tr>
 
-	<tr>
-		<td align="center" colspan="2" style="padding-top: 10px;">
-		<input class="button" type="submit" id="login" value="Login" tabindex="30" onclick="BtnClicked(this); return CheckRequiredFields();" />
-		</td>
-	</tr>
+    <tr>
+        <td align="center" colspan="2" style="padding-top: 10px;">
+        <input class="button" type="submit" id="login" value="Login" tabindex="30" onclick="BtnClicked(this); return CheckRequiredFields();" />
+        </td>
+    </tr>
 </table>
 </form>
 </body>

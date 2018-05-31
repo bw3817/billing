@@ -18,12 +18,18 @@ class CategoriesController(BasePlusController):
         return render('/categories/index.mako')
 
     def find(self):
-        categories = self.db.query(model.Category).order_by(model.Category.cat_nm).filter(model.Customer.status == True).all()
-        return render('/categories/categories.mako', extra_vars={'categories':categories})
+        status = request.params.get('status', 'A')
+        MAP_STATUS = dict(A=True, N=False)
+        qry = self.db.query(model.Category)
+        qry = qry.filter(model.Category.status == MAP_STATUS[status])
+        qry = qry.order_by(model.Category.cat_nm)
+        print qry
+        categories = qry.all()
+        return render('/categories/categories.mako', extra_vars={'categories': categories})
 
     def new(self):
         category = model.Category()
-        return render('/categories/new.mako', extra_vars={'category':category})
+        return render('/categories/new.mako', extra_vars={'category': category})
 
     def view(self, cat_id=None):
         if cat_id is None:
@@ -34,7 +40,7 @@ class CategoriesController(BasePlusController):
         category = self.db.query(model.Category).filter(model.Category.id == cat_id).first()
         if category is None:
             category = model.Category()
-        return render('/categories/view.mako', extra_vars={'category':category})
+        return render('/categories/view.mako', extra_vars={'category': category})
 
     def edit(self, cat_id=None):
         session['cat_id'] = cat_id
@@ -42,16 +48,19 @@ class CategoriesController(BasePlusController):
         category = self.db.query(model.Category).filter(model.Category.id == cat_id).first()
         if category is None:
             category = model.Category()
-        return render('/categories/new.mako', extra_vars={'category':category})
+        return render('/categories/new.mako', extra_vars={'category': category})
 
     def save(self):
         if 'cat_nm' in request.params:
-            if request.params.get('cat_id','') == '':
+            if request.params.get('cat_id', '') == '':
                 category = model.Category()
                 category.cre_dt = datetime.now()
             else:
-                category = self.db.query(model.Category).filter(model.Category.id == request.params['cat_id']).first()
-            category.cat_nm = request.params['cat_nm']
+                qry = self.db.query(model.Category)
+                qry = qry.filter(model.Category.id == request.params['cat_id'])
+                category = qry.first()
+            category.cat_nm = request.params.get('cat_nm')
+            category.status = int(request.params.get('status', '0'))
             self.db.add(category)
             self.db.commit()
             session['cat_id'] = category.id

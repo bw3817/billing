@@ -1,8 +1,8 @@
 <%doc>
 ========================================
-	Template: categories/index.mako
-	Author: Brian Wolf
-	Date: 2010.01.03
+    Template: categories/index.mako
+    Author: Brian Wolf
+    Date: 2010.01.03
 ========================================
 </%doc>
 <%inherit file="/base.mako"/>
