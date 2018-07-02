@@ -103,6 +103,7 @@ class CustomerType(Base):
     id = Column(Integer, primary_key=True)
     cust_type = Column(String(1))
     dscr = Column(String(40))
+    active = Column(Boolean, default=True)
 
     def __init__(self, **kwargs):
         for k,v in kwargs.items():

@@ -48,9 +48,6 @@ class CustomersController(BasePlusController):
         if xaction == 'view':
             qry = self.db.query(model.Customer)
             qry = qry.filter(model.Customer.cust_type.like('%X%'))
-            #qry = qry.filter(model.Customer.status == True)
-            #qry = qry.filter(or_(model.Customer.status == True, 
-            #                     and_(model.Customer.status == False, model.Customer.amt > 0)))
             qry = qry.order_by(model.Customer.cust_nm)
             customers = qry.all()
             for customer in customers:
@@ -144,7 +141,10 @@ class CustomersController(BasePlusController):
 
     def new(self):
         customer = model.Customer()
-        customer_types = self.db.query(model.CustomerType).order_by(model.CustomerType.dscr).all()
+        qry = self.db.query(model.CustomerType)
+        qry = qry.filter(model.CustomerType.active == True)
+        qry = qry.order_by(model.CustomerType.dscr)
+        customer_types = qry.all()
         return render('/customers/new.mako', extra_vars=dict(customer=customer, customer_types=customer_types))
 
 
