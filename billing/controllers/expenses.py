@@ -52,7 +52,7 @@ class ExpensesController(BasePlusController):
         qry = qry.filter(model.Vendor.status == True)
         if c.cat_id is not None:
             qry = qry.filter(model.Vendor.cat_id == c.cat_id)
-        qry = qry.order_by(model.Vendor.vend_nm)
+        qry = qry.order_by(model.Vendor.vend_nm, model.Expense.yr, model.Expense.mo)
         vendors = qry.all()
         return render('/expenses/report.mako', extra_vars={'vendors':vendors, 'categories':categories})
 
@@ -97,7 +97,10 @@ class ExpensesController(BasePlusController):
                 qry = qry.filter(model.Vendor.id == vend_id)
         qry = qry.filter(model.Expense.paid_dt >= c.start_dt)
         qry = qry.filter(model.Expense.paid_dt <= c.end_dt)
-        expenses = qry.order_by(model.Expense.paid_dt, model.Expense.id)
+        expenses = qry.order_by(
+            model.Expense.yr, model.Expense.mo,
+            model.Expense.paid_dt, model.Expense.id,
+        )
         c.expenses = []
         for expense in expenses:
             r = RowData(expense.Expense)
