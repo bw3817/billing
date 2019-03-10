@@ -52,7 +52,7 @@ class ExpensesController(BasePlusController):
         qry = qry.filter(model.Vendor.status == True)
         if c.cat_id is not None:
             qry = qry.filter(model.Vendor.cat_id == c.cat_id)
-        qry = qry.order_by(model.Vendor.vend_nm, model.Expense.yr, model.Expense.mo)
+        qry = qry.order_by(model.Vendor.vend_nm)
         vendors = qry.all()
         return render('/expenses/report.mako', extra_vars={'vendors':vendors, 'categories':categories})
 
