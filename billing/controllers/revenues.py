@@ -101,7 +101,7 @@ class RevenuesController(BasePlusController):
 
         # revenue (parent)
         revenue.total = request.params.get('amt',0)
-        revenue.dep_dt = request.params.get('dep_dt', date.today().isoformat())
+        revenue.dep_dt = request.params.get('dep_dt') or date.today().isoformat()
         revenue.cre_dt = datetime.now()
         self.db.add(revenue)
         self.db.commit()
