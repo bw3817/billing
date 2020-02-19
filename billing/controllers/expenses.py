@@ -22,9 +22,7 @@ ISO_DATE_FORMAT = "%Y-%m-%d"
 class ExpenseData(Schema):
     allow_extra_fields = True
     filter_extra_fields = True
-    #iso_date_pattern = """^(\d{4}(?:(?:(?:\-)?(?:00[1-9]|0[1-9][0-9]|[1-2][0-9][0-9]|3[0-5][0-9]|36[0-6]))?|(?:(?:\-)?(?:1[0-2]|0[1-9]))?|(?:(?:\-)?(?:1[0-2]|0[1-9])(?:\-)?(?:0[1-9]|[12][0-9]|3[01]))?|(?:(?:\-)?W(?:0[1-9]|[1-4][0-9]5[0-3]))?|(?:(?:\-)?W(?:0[1-9]|[1-4][0-9]5[0-3])(?:\-)?[1-7])?)?)$"""
     iso_date_pattern = """^([0-9]{4})(?:(1[0-2]|0[1-9])|-?(1[0-2]|0[1-9])-?)(3[0-1]|0[1-9]|[1-2][0-9])$"""
-    #year_month_pattern = """^([0-9]{4})-(1[0-2]|0[1-9]|[1-9])$"""
     year_month_pattern = """^([0-9]{4})-(1[0-2]|0[1-9]|[1-9])*"""
     vend_id = validators.Int(not_empty=True, strip=True, messages={"empty":"Please select a vendor."})
     pay_mthd = validators.String(not_empty=True, strip=True, messages={"empty":"Please select a payment method."})
