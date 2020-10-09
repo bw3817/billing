@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""
 #----------------------------------------------------------------------
 # Author:            Brian Wolf
 # Company:           Activus Technologies
@@ -10,24 +11,29 @@
 #
 #
 #----------------------------------------------------------------------
+"""
 
-
-# built-ins
 import os
-from ConfigParser import SafeConfigParser
-from datetime import datetime, date, timedelta
+from configparser import ConfigParser
+from datetime import datetime, date
 from decimal import Decimal
 
-# reportlab
-from reportlab.platypus import (
-    SimpleDocTemplate, Table, TableStyle,
-    PageBreak, Spacer, Image
-)
+from sqlalchemy  import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from reportlab.platypus import SimpleDocTemplate, Table, Spacer
 from reportlab.platypus.paragraph import Paragraph
-#from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
+
+from instance.development import SQLALCHEMY_DATABASE_URI
+from models.invoices import Customer, Hours, Project
+
+
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
+SessionFactory = sessionmaker(bind=engine)
+db = SessionFactory()
 
 
 class GenInvoice(object):
@@ -40,7 +46,7 @@ class GenInvoice(object):
         self.invoice_no = self.gen_invoice_no()
         for k,v in kwargs.items():
             setattr(self, k, v)
-        self.logo_dir = '/home/brian/Documents/logo/activus'
+        self.logo_dir = '/home/bw/Documents/logo/activus'
         self.logo_fn = 'activus_logo_2011.png'
         self.pageinfo = 'Activus Invoice '.format(self.invoice_no)
 
@@ -77,7 +83,7 @@ class GenInvoice(object):
 
     def make(self):
         filename = "{0}.pdf".format(self.invoice_no)
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.read('development.ini')
         billing_dir = config.get('app:main', 'billing.invoices_dir')
         path = os.path.join(billing_dir, filename)
@@ -115,13 +121,14 @@ class GenInvoice(object):
         story.append(spacer)
 
         # summary
-        total_hours = sum([h.hrs or 0 for h in self.hours])
-        total_expenses = sum([h.amt_exp or 0 for h in self.hours])
+        total_hours = sum([h.Hours.hrs or 0 for h in self.hours])
+        total_expenses = sum([h.Hours.amt_exp or 0 for h in self.hours])
         if self.maximum:
             total_amount = Decimal(self.maximum)
         else:
-            total_amount = sum([self.customer.rate * (h.hrs or 0)
-                                for h in self.hours])
+            total_amount = sum(
+                [self.customer.rate * (h.Hours.hrs or 0) for h in self.hours]
+            )
             total_amount += total_expenses
             if self.discount:
                 total_amount -= Decimal(self.discount)
@@ -154,22 +161,22 @@ class GenInvoice(object):
         data = []
         for n, h in enumerate(self.hours):
             # positive hours means use hours, not expense
-            if h.hrs and h.hrs != 0:
+            if h.Hours.hrs and h.Hours.hrs != 0:
                 data.append((
-                    h.performed.strftime('%m/%d/%Y'),
+                    h.Hours.performed.strftime('%m/%d/%Y'),
                     Paragraph(
-                    self.combine(h.project_name, h.comments), self.styles["BodyText"]),
-                    '{0:.2f}'.format(h.hrs),
-                    '{0:.2f}'.format(self.customer.rate * h.hrs or h.amt_exp),
+                    self._combine(h.Project.name, h.Hours.comments), self.styles["BodyText"]),
+                    '{0:.2f}'.format(h.Hours.hrs),
+                    '{0:.2f}'.format(self.customer.rate * h.Hours.hrs or h.Hours.amt_exp),
                 ))
             # no hours implies an expense rather than hours
             else:
                 data.append((
                     h.performed.strftime('%m/%d/%Y'),
                     Paragraph(
-                    self.combine(h.project_name, h.comments), self.styles["BodyText"]),
+                    self._combine(h.project_name, h.comments), self.styles["BodyText"]),
                     '',
-                    '{0:.2f}'.format(h.amt_exp),
+                    '{0:.2f}'.format(h.Hours.amt_exp),
                 ))
             # set background color for alternating rows
             if n > 0:
@@ -194,8 +201,35 @@ class GenInvoice(object):
         doc.build(story, onFirstPage=self.first_page, onLaterPages=self.later_pages)
         return path
 
-    def combine(self, project, comments=None):
-        if (comments or "").strip() == "":
-            return project
-        else:
-            return project + ": " + comments
+    @staticmethod
+    def _combine(project, comments=None):
+        return project if (comments or '').strip() == '' else f'{project}: {comments}'
+
+
+def get_customer():
+    return db.query(Customer).filter(Customer.id == 2).first()
+
+
+def get_hours():
+    return (
+        db.query(Hours, Project)
+        .join(Project, Project.id == Hours.project_id)
+        .filter(Hours.billing_status == 'U')
+        .filter(Hours.cust_id == 2)
+        .order_by(Hours.performed, Hours.id)
+        .all()
+    )
+
+
+def generate_invoice():
+    customer = get_customer()
+    hours = get_hours()
+    maximum = 0
+    discount = 80
+    gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
+    full_path = gen_inv.make()
+    print(full_path)
+
+
+if __name__ == '__main__':
+    generate_invoice()

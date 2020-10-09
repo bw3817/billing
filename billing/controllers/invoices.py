@@ -143,8 +143,8 @@ class InvoicesController(BasePlusController):
         discount = request.GET.get('discount')
 
         # generate invoice
-        g = GenInvoice(customer, hours, maximum=maximum, discount=discount)
-        full_path = g.make()
+        gen_invoice = GenInvoice(customer, hours, maximum=maximum, discount=discount)
+        full_path = gen_invoice.make()
         path, filename = os.path.split(full_path)
         fn, ext = os.path.splitext(filename)
         info = dict(status=1, invoice=fn)
@@ -303,7 +303,7 @@ class InvoicesController(BasePlusController):
         extra_vars.update(last_cust_id=int(settings['customer_id']))
         try:
             project_id = int(settings['project_id'])
-        except ValueError,e:
+        except ValueError as e:
             project_id = 'all'
         extra_vars.update(last_project_id=project_id)
 
