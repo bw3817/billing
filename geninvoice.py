@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 """
-#----------------------------------------------------------------------
-# Author:            Brian Wolf
-# Company:           Activus Technologies
-# Date:              2014.02.21
-# Module:            invoice.py
-# Description:       Generates an invoice
-#
-# Modifications:
-#
-#
-#----------------------------------------------------------------------
+ Author:  Brian Wolf
+Company:   Activus Technologies
+Date:  2014.02.21
+Module:  geninvoice.py
+Description:  Generates an invoice
+Modifications:
+2020.11.19  keyword arguments
 """
 
 import os
@@ -43,7 +39,7 @@ class GenInvoice(object):
         self.styles = getSampleStyleSheet()
         self.customer = customer
         self.hours = hours
-        self.invoice_no = self.gen_invoice_no()
+        self.invoice_no = self.gen_invoice_number()
         for k,v in kwargs.items():
             setattr(self, k, v)
         self.logo_dir = '/home/bw/Documents/logo/activus'
@@ -62,7 +58,7 @@ class GenInvoice(object):
         canvas.drawImage(os.path.join(self.logo_dir, self.logo_fn), width - 1.7*inch, height)
         canvas.setFont('Helvetica', 11)
         line_height = 0.25 * inch
-        for a,t in enumerate(('3817 Menlo Drive', 'Baltimore, MD 21215', '410-367-2958')):
+        for a, t in enumerate(('3817 Menlo Drive', 'Baltimore, MD 21215', '410-367-2958')):
             height -= line_height
             canvas.drawCentredString(width, height, t)
         height -= line_height
@@ -76,7 +72,7 @@ class GenInvoice(object):
         canvas.drawString(inch, 0.75 * inch, "Page %d %s" % (doc.page, self.pageinfo))
         canvas.restoreState()
 
-    def gen_invoice_no(self):
+    def gen_invoice_number(self):
         d = datetime.now()
         a = d.strftime('%y%j')
         return a + self.customer.abrv.upper()
@@ -165,16 +161,17 @@ class GenInvoice(object):
                 data.append((
                     h.Hours.performed.strftime('%m/%d/%Y'),
                     Paragraph(
-                    self._combine(h.Project.name, h.Hours.comments), self.styles["BodyText"]),
-                    '{0:.2f}'.format(h.Hours.hrs),
-                    '{0:.2f}'.format(self.customer.rate * h.Hours.hrs or h.Hours.amt_exp),
-                ))
+                        self._combine(h.Project.name, h.Hours.comments), self.styles["BodyText"]),
+                        '{0:.2f}'.format(h.Hours.hrs),
+                        '{0:.2f}'.format(self.customer.rate * h.Hours.hrs or h.Hours.amt_exp)
+                    )
+                )
             # no hours implies an expense rather than hours
             else:
                 data.append((
                     h.performed.strftime('%m/%d/%Y'),
                     Paragraph(
-                    self._combine(h.project_name, h.comments), self.styles["BodyText"]),
+                    self._combine(h.project_name, h.Hours.comments), self.styles["BodyText"]),
                     '',
                     '{0:.2f}'.format(h.Hours.amt_exp),
                 ))
@@ -206,30 +203,30 @@ class GenInvoice(object):
         return project if (comments or '').strip() == '' else f'{project}: {comments}'
 
 
-def get_customer():
-    return db.query(Customer).filter(Customer.id == 2).first()
+def get_customer(cust_id=2):
+    return db.query(Customer).filter(Customer.id == cust_id).first()
 
 
-def get_hours():
+def get_hours(cust_id=2, project_id=30, status='U'):
     return (
         db.query(Hours, Project)
         .join(Project, Project.id == Hours.project_id)
-        .filter(Hours.billing_status == 'U')
-        .filter(Hours.cust_id == 2)
+        .filter(Hours.cust_id == cust_id)
+        .filter(Hours.project_id == project_id)
+        .filter(Hours.billing_status == status)
         .order_by(Hours.performed, Hours.id)
         .all()
     )
 
 
-def generate_invoice():
+def generate_invoice(cust_id, project_id, discount):
     customer = get_customer()
-    hours = get_hours()
+    hours = get_hours(cust_id, project_id)
     maximum = 0
-    discount = 80
     gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
     full_path = gen_inv.make()
     print(full_path)
 
 
 if __name__ == '__main__':
-    generate_invoice()
+    generate_invoice(cust_id=2, project_id=22, discount=0)
