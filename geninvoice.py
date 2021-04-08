@@ -1,6 +1,5 @@
-#!/usr/bin/env python
 """
- Author:  Brian Wolf
+Author:  Brian Wolf
 Company:   Activus Technologies
 Date:  2014.02.21
 Module:  geninvoice.py
@@ -14,7 +13,7 @@ from configparser import ConfigParser
 from datetime import datetime, date
 from decimal import Decimal
 
-from sqlalchemy  import create_engine
+from sqlalchemy  import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from reportlab.platypus import SimpleDocTemplate, Table, Spacer
@@ -208,18 +207,35 @@ def get_customer(cust_id=2):
 
 
 def get_hours(cust_id=2, project_id=30, status='U'):
+    """
+    Return a list of hours to be billed.
+    :param cust_id: int
+    :param project_id: int
+    :param status: one character (U=unbilled, B=billed, P=paid)
+    :return:
+    """
+    last_month = max(date.today().month - 1, 1)
+
     return (
         db.query(Hours, Project)
         .join(Project, Project.id == Hours.project_id)
         .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
         .filter(Hours.billing_status == status)
+        .filter(func.month(Hours.performed) == last_month)
         .order_by(Hours.performed, Hours.id)
         .all()
     )
 
 
 def generate_invoice(cust_id, project_id, discount):
+    """
+    Generate an invoice as a PDF document.
+    :param cust_id: int
+    :param project_id: int
+    :param discount: numeric
+    :return: None
+    """
     customer = get_customer()
     hours = get_hours(cust_id, project_id)
     maximum = 0
