@@ -214,7 +214,8 @@ def get_hours(cust_id=2, project_id=30, status='U'):
     :param status: one character (U=unbilled, B=billed, P=paid)
     :return:
     """
-    last_month = max(date.today().month - 1, 1)
+    today = date.today()
+    month_performed = max(today.month - 1, 1) if today.day < 15 else today.month
 
     return (
         db.query(Hours, Project)
@@ -222,7 +223,7 @@ def get_hours(cust_id=2, project_id=30, status='U'):
         .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
         .filter(Hours.billing_status == status)
-        .filter(func.month(Hours.performed) == last_month)
+        .filter(func.month(Hours.performed) == month_performed)
         .order_by(Hours.performed, Hours.id)
         .all()
     )

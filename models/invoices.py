@@ -49,6 +49,7 @@ class Hours(Base):
     def __repr__(self):
         return str(self)
 
+
 class Project(Base):
     """Define a customer."""
 

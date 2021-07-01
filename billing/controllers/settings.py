@@ -1,12 +1,14 @@
-# controller: settings
-from pylons import config, url, request, response, session, tmpl_context as c
-from pylons.controllers.util import abort, redirect
+"""Project settings"""
+
+#from pylons import config, url, request, response, session, tmpl_context as c
+#from pylons.controllers.util import abort, redirect
+
 from billing.lib.baseplus import BasePlusController, render
-import billing.model.meta as meta
+#import billing.model.meta as meta
 import billing.model as model
 import billing.lib.helpers as h
-from datetime import datetime
-from billing.lib.common.utils import Utils
+#from datetime import datetime
+#from billing.lib.common.utils import Utils
 
 
 class SettingsController(BasePlusController):

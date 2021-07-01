@@ -1,4 +1,5 @@
-"""SQLAlchemy Metadata and Session object"""
+"""Define SQLAlchemy meta data and session object."""
+
 from sqlalchemy import MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 

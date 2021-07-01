@@ -1,13 +1,16 @@
-# defines data model
-import sqlalchemy as sa
-from sqlalchemy import orm
-from sqlalchemy import Table, Column, Integer, Boolean, String, Text, Date, Numeric
-from sqlalchemy import ColumnDefault, ForeignKey
-from sqlalchemy.types import TIMESTAMP
-from sqlalchemy.orm import relation
-from sqlalchemy.ext.declarative import declarative_base
-from billing.model import meta
+"""
+Define models.
+Non-reflected tables may be defined and mapped at module level.
+"""
+
 from datetime import datetime
+
+from sqlalchemy import Column, Integer, Boolean, String, Text, Date, Numeric
+from sqlalchemy import ForeignKey
+from sqlalchemy.types import TIMESTAMP
+from sqlalchemy.ext.declarative import declarative_base
+
+from billing.model import meta
 
 
 def init_model(engine):
@@ -22,7 +25,6 @@ def init_model(engine):
 Base = declarative_base(metadata=meta.MetaData())
 
 
-## non-reflected tables may be defined and mapped at module level
 class Setting(Base):
     __tablename__ = 'settings'
 
