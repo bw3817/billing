@@ -5,10 +5,10 @@ Non-reflected tables may be defined and mapped at module level.
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Boolean, String, Text, Date, Numeric
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, Boolean, String, Text, Date, Numeric
 from sqlalchemy.types import TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 from billing.model import meta
 
@@ -142,7 +142,7 @@ class Expense(Base):
     __tablename__ = 'expenses'
 
     id = Column(Integer, primary_key=True)
-    vend_id = Column(Integer)
+    vend_id = Column(Integer, ForeignKey('vendors.id'))
     amt = Column(Numeric(10, 2))
     mo = Column(Integer)
     yr = Column(Integer)
@@ -153,12 +153,15 @@ class Expense(Base):
     cre_dt = Column(TIMESTAMP)
     mod_dt = Column(TIMESTAMP, default=datetime.now())
 
+    # relationships
+    vendor = relationship("Vendor")
+
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
             setattr(self, k, v)
 
     def __repr__(self):
-        return "<Expense(%s, %s)>" % (self.vend_id, self.amt)
+        return f"Expense({self.vendor.vend_nm}, {self.yr}-{self.mo}, {self.amt})"
 
 
 class Revenue(Base):
@@ -265,15 +268,18 @@ class Vendor(Base):
     __tablename__ = 'vendors'
 
     id = Column(Integer, primary_key=True)
-    cat_id = Column(Integer)
+    cat_id = Column(Integer, ForeignKey('categories.id'))
     vend_nm = Column(String(40))
     status = Column(Boolean, default=True)
     cre_dt = Column(TIMESTAMP)
     mod_dt = Column(TIMESTAMP, default=datetime.now())
+
+    # relationships
+    category = relationship("Category")
 
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
             setattr(self, k, v)
 
     def __repr__(self):
-        return "<Vendor('%s', '%s')>" % (self.cat_id, self.vend_nm)
+        return f"Vendor({self.vend_nm}, {self.category.cat_nm})"

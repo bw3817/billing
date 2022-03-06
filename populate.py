@@ -21,33 +21,33 @@ def last_working_day(mo, yr):
     return d
 
 
-def add_expenses(db, yr, vendor_id, amt):
+def add_expenses(db, yr, vendor_id, amount=1.00, pay_mthd='cc'):
     for mo in range(1, 12+1):
-        expense = Expense()
-        expense.vend_id = vendor_id
-        expense.amt = amt
-        expense.mo = mo
-        expense.yr = yr
-        expense.pay_mthd = 'cc'
-        if vendor_id == 85:
-            expense.paid_dt = last_working_day(mo, yr)
-        elif vendor_id == 89:
-            expense.paid_dt = first_working_day(mo, yr)
-        #print expense.mo, expense.yr, vendor_id, expense.amt, expense.paid_dt
-        expense.cre_dt = expense.mod_dt = datetime.now()
-        db.add(expense)
-    db.commit()
+        expense = (
+            db.query(Expense)
+            .filter(Expense.yr == yr)
+            .filter(Expense.mo == mo)
+            .filter(Expense.vend_id == vendor_id)
+            .first()
+        )
+        if not expense:
+            expense = Expense()
+            expense.vend_id = vendor_id
+            expense.amt = amount
+            expense.mo = mo
+            expense.yr = yr
+            expense.pay_mthd = pay_mthd
+            expense.cre_dt = expense.mod_dt = datetime.now()
+            db.add(expense)
+        db.commit()
 
 
 if __name__ == "__main__":
     dburl = "mysql://root:chazak@localhost/billing"
     engine = create_engine(dburl)
-    Session = sessionmaker(bind=engine)
-    db_session = Session()
-    #db_session = meta.Session()
+    SessionFactory = sessionmaker(bind=engine)
+    db = SessionFactory()
 
-    current_date = date.today()
-    current_year = current_date.year if current_date.month == 1 else current_date.year + 1
-
-    for vend_id, amt in ((85, 7), (89, 12)):
-        add_expenses(db_session, current_year, vend_id, amt)
+    year = 2022
+    for vend_id in (7, 24, 69, 90, 9, 11, 73, 85, 89):
+        add_expenses(db, year, vend_id)

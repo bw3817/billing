@@ -33,7 +33,7 @@ def get_date():
             pass
 
 
-def add_hours(db_session, cust_id=2, project_id=22):
+def add_hours(db, cust_id=2, project_id=22):
     hrs = get_hours()
     performed = get_date()
     new_hours = Hours()
@@ -44,8 +44,8 @@ def add_hours(db_session, cust_id=2, project_id=22):
     new_hours.billing_status = 'U'
     new_hours.cre_dt = datetime.now()
     new_hours.mod_dt = datetime.now()
-    db_session.add(new_hours)
-    db_session.commit()
+    db.add(new_hours)
+    db.commit()
     return new_hours
 
 
@@ -57,5 +57,5 @@ def get_session():
 
 if __name__ == '__main__':
     db_session = get_session()
-    new_hours = add_hours(db_session)
-    print(new_hours)
+    hours = add_hours(db_session)
+    print(hours)

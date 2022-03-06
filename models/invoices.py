@@ -26,6 +26,9 @@ class Customer(Base):
     cre_dt = NullableColumn(DateTime)
     mod_dt = NullableColumn(DateTime)
 
+    def __str__(self):
+        return self.cust_nm
+
 
 class Hours(Base):
     """Define a customer."""

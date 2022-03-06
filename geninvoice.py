@@ -206,6 +206,21 @@ def get_customer(cust_id=2):
     return db.query(Customer).filter(Customer.id == cust_id).first()
 
 
+def get_hours_months(cust_id=2, project_id=30, status='U'):
+    current_month = date.today().month
+
+    return (
+        db.query(Hours, Project)
+        .join(Project, Project.id == Hours.project_id)
+        .filter(Hours.cust_id == cust_id)
+        .filter(Hours.project_id == project_id)
+        .filter(Hours.billing_status == status)
+        .filter(func.month(Hours.performed) != current_month)
+        .order_by(Hours.performed, Hours.id)
+        .all()
+    )
+
+
 def get_hours(cust_id=2, project_id=30, status='U'):
     """
     Return a list of hours to be billed.
@@ -223,10 +238,29 @@ def get_hours(cust_id=2, project_id=30, status='U'):
         .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
         .filter(Hours.billing_status == status)
-        .filter(func.month(Hours.performed) == month_performed)
+        #.filter(func.month(Hours.performed) == month_performed)
         .order_by(Hours.performed, Hours.id)
         .all()
     )
+
+
+
+def get_month_performed():
+    current_date = date.today()
+    prev_month = lambda d: (d.year - 1, 12, d.day) if d.month == 1 else (d.year, d.month -1, d.day)
+    last_month = current_date.replace(*prev_month(current_date))
+    prompt = f'Enter month performed [{last_month}]: '
+    while True:
+        response = input(prompt).strip()
+        if response == '':
+            return last_month
+
+        try:
+            return date.fromisoformat(f'{response}-01')
+        except ValueError:
+            pass
+
+
 
 
 def generate_invoice(cust_id, project_id, discount):
@@ -237,8 +271,10 @@ def generate_invoice(cust_id, project_id, discount):
     :param discount: numeric
     :return: None
     """
+    #month_performed = get_month_performed()
     customer = get_customer()
     hours = get_hours(cust_id, project_id)
+    #hours = get_hours_months(cust_id, project_id)
     maximum = 0
     gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
     full_path = gen_inv.make()
