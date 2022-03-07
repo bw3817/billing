@@ -1,8 +1,12 @@
+"""Populate expenses with a standard amount for each month of a given year."""
+
 from datetime import datetime, date, timedelta
-from billing.model import Expense
+from decimal import Decimal
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-#import billing.model.meta as meta
+
+from billing.model import Expense
 
 
 def first_working_day(mo, yr):
@@ -30,7 +34,10 @@ def add_expenses(db, yr, vendor_id, amount=1.00, pay_mthd='cc'):
             .filter(Expense.vend_id == vendor_id)
             .first()
         )
-        if not expense:
+        if expense:
+            if expense.amt < amount:
+                expense.amt = amount
+        else:
             expense = Expense()
             expense.vend_id = vendor_id
             expense.amt = amount
@@ -48,6 +55,16 @@ if __name__ == "__main__":
     SessionFactory = sessionmaker(bind=engine)
     db = SessionFactory()
 
-    year = 2022
-    for vend_id in (7, 24, 69, 90, 9, 11, 73, 85, 89):
-        add_expenses(db, year, vend_id)
+    amounts = {
+        7: Decimal('1.00'),
+        24: Decimal('7.14'),
+        69: Decimal('1.00'),
+        85: Decimal('1.00'),
+        89: Decimal('4.00'),
+        90: Decimal('4.00'),
+        98: Decimal('7.14'),
+    }
+
+    year = date.today().year - 1
+    for vend_id in (7, 24, 69, 90, 85, 89, 98):
+        add_expenses(db, year, vend_id, amounts[vend_id])
