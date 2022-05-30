@@ -230,7 +230,7 @@ def get_hours(cust_id=2, project_id=30, status='U'):
     :return:
     """
     today = date.today()
-    month_performed = max(today.month - 1, 1) if today.day < 15 else today.month
+    years_performed = (today.year, today.year - 1) if today.month == 1 else (today.year,)
 
     return (
         db.query(Hours, Project)
@@ -238,11 +238,10 @@ def get_hours(cust_id=2, project_id=30, status='U'):
         .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
         .filter(Hours.billing_status == status)
-        #.filter(func.month(Hours.performed) == month_performed)
+        .filter(func.year(Hours.performed).in_(years_performed))
         .order_by(Hours.performed, Hours.id)
         .all()
     )
-
 
 
 def get_month_performed():
@@ -259,8 +258,6 @@ def get_month_performed():
             return date.fromisoformat(f'{response}-01')
         except ValueError:
             pass
-
-
 
 
 def generate_invoice(cust_id, project_id, discount):
