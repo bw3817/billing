@@ -244,6 +244,25 @@ def get_hours(cust_id=2, project_id=30, status='U'):
     )
 
 
+def get_extra_hours(cust_id=2, project_id=30, status='U'):
+    class Data:
+        def __init__(self, **kwargs):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
+    extra_hours = Hours()
+    extra_hours.cust_id = cust_id
+    extra_hours.project_id = project_id
+    extra_hours.hrs = Decimal('0.6')
+    extra_hours.billing_status = status
+    extra_hours.performed = date(2021, 12, 30)
+    extra_hours.comments = "end of year; not billed until now"
+    extra_hours.cre_dt = datetime.now()
+    extra_hours.mod_dt = datetime.now()
+
+    return [Data(Hours=extra_hours, Project=Data(name='Bacon Sails'))]
+
+
 def get_month_performed():
     current_date = date.today()
     prev_month = lambda d: (d.year - 1, 12, d.day) if d.month == 1 else (d.year, d.month -1, d.day)
@@ -268,10 +287,8 @@ def generate_invoice(cust_id, project_id, discount):
     :param discount: numeric
     :return: None
     """
-    #month_performed = get_month_performed()
     customer = get_customer()
-    hours = get_hours(cust_id, project_id)
-    #hours = get_hours_months(cust_id, project_id)
+    hours = get_hours(cust_id, project_id) # + get_extra_hours(cust_id, project_id)
     maximum = 0
     gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
     full_path = gen_inv.make()
