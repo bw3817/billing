@@ -8,6 +8,7 @@ Modifications:
 2020.11.19  keyword arguments
 """
 
+import sys
 import os
 from configparser import ConfigParser
 from datetime import datetime, date
@@ -25,10 +26,13 @@ from reportlab.lib.units import inch
 from instance.development import SQLALCHEMY_DATABASE_URI
 from models.invoices import Customer, Hours, Project
 
-
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 SessionFactory = sessionmaker(bind=engine)
 db = SessionFactory()
+
+
+CUSTOMER_ID = 2
+PROJECT_ID = 30
 
 
 class GenInvoice(object):
@@ -57,7 +61,7 @@ class GenInvoice(object):
         canvas.drawImage(os.path.join(self.logo_dir, self.logo_fn), width - 1.7*inch, height)
         canvas.setFont('Helvetica', 11)
         line_height = 0.25 * inch
-        for a, t in enumerate(('3817 Menlo Drive', 'Baltimore, MD 21215', '410-367-2958')):
+        for a, t in enumerate(('3817 Menlo Drive', 'Baltimore, MD 21215', '443-938-8127')):
             height -= line_height
             canvas.drawCentredString(width, height, t)
         height -= line_height
@@ -72,9 +76,9 @@ class GenInvoice(object):
         canvas.restoreState()
 
     def gen_invoice_number(self):
-        d = datetime.now()
-        a = d.strftime('%y%j')
-        return a + self.customer.abrv.upper()
+        current_time = datetime.now()
+        day_of_year = current_time.strftime('%y%j')
+        return day_of_year + self.customer.abrv.upper()
 
     def make(self):
         filename = "{0}.pdf".format(self.invoice_no)
@@ -229,8 +233,8 @@ def get_hours(cust_id=2, project_id=30, status='U'):
     :param status: one character (U=unbilled, B=billed, P=paid)
     :return:
     """
-    today = date.today()
-    years_performed = (today.year, today.year - 1) if today.month == 1 else (today.year,)
+    #today = date.today()
+    #years_performed = (today.year, today.year - 1) if today.month == 1 else (today.year,)
 
     return (
         db.query(Hours, Project)
@@ -238,7 +242,7 @@ def get_hours(cust_id=2, project_id=30, status='U'):
         .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
         .filter(Hours.billing_status == status)
-        .filter(func.year(Hours.performed).in_(years_performed))
+        #.filter(func.year(Hours.performed).in_(years_performed))
         .order_by(Hours.performed, Hours.id)
         .all()
     )
@@ -279,7 +283,7 @@ def get_month_performed():
             pass
 
 
-def generate_invoice(cust_id, project_id, discount):
+def generate_invoice(cust_id, project_id, discount=0, status='U'):
     """
     Generate an invoice as a PDF document.
     :param cust_id: int
@@ -287,8 +291,8 @@ def generate_invoice(cust_id, project_id, discount):
     :param discount: numeric
     :return: None
     """
-    customer = get_customer()
-    hours = get_hours(cust_id, project_id) # + get_extra_hours(cust_id, project_id)
+    customer = get_customer(cust_id)
+    hours = get_hours(cust_id, project_id, status)
     maximum = 0
     gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
     full_path = gen_inv.make()
@@ -296,4 +300,11 @@ def generate_invoice(cust_id, project_id, discount):
 
 
 if __name__ == '__main__':
-    generate_invoice(cust_id=2, project_id=22, discount=0)
+    cust_proj_map = {3: 30, 65:55}
+    customer_id = int(sys.argv[1]) if len(sys.argv) > 1 else CUSTOMER_ID
+    try:
+        project_id = int(sys.argv[2]) if len(sys.argv) > 2 else cust_proj_map.get(customer_id, PROJECT_ID)
+    except ValueError:
+        project_id = cust_proj_map.get(customer_id, PROJECT_ID)
+    status = sys.argv[-1] if sys.argv[-1] in ('U', 'B', 'P') else 'U'
+    generate_invoice(cust_id=customer_id, project_id=project_id, discount=0, status=status)
