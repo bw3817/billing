@@ -37,6 +37,8 @@ PROJECT_ID = 30
 
 class GenInvoice(object):
     def __init__(self, customer, hours, **kwargs):
+        current_time = datetime.now()
+        self.day_of_year = current_time.strftime('%y%j')
         self.PAGE_HEIGHT = defaultPageSize[1]
         self.PAGE_WIDTH = defaultPageSize[0]
         self.styles = getSampleStyleSheet()
@@ -47,17 +49,17 @@ class GenInvoice(object):
             setattr(self, k, v)
         self.logo_dir = '/home/bw/Documents/logo/activus'
         self.logo_fn = 'activus_logo_2011.png'
-        self.pageinfo = 'Activus Invoice '.format(self.invoice_no)
+        self.pageinfo = f'Cognify Solutions Invoice {self.day_of_year} for {self.customer}'
 
     def first_page(self, canvas, doc):
-        canvas.setAuthor = 'Activus Technologies'
-        canvas.setTitle = 'Activus Technologies Invoice'
-        canvas.setSubject = 'Activus Technologies Invoice'
+        canvas.setAuthor = 'Cognify Solutions'
+        canvas.setTitle = 'Cognify Solutions Invoice'
+        canvas.setSubject = 'Cognify Solutions Invoice'
         canvas.saveState()
         canvas.setFont('Helvetica', 16)
         width = self.PAGE_WIDTH / 2.0
         height = self.PAGE_HEIGHT - 1.7 * inch
-        canvas.drawCentredString(width, height, 'ACTIVUS TECHNOLOGIES')
+        canvas.drawCentredString(width, height, 'COGNIFY SOLUTIONS')
         canvas.drawImage(os.path.join(self.logo_dir, self.logo_fn), width - 1.7*inch, height)
         canvas.setFont('Helvetica', 11)
         line_height = 0.25 * inch
@@ -65,7 +67,7 @@ class GenInvoice(object):
             height -= line_height
             canvas.drawCentredString(width, height, t)
         height -= line_height
-        canvas.drawCentredString(width, height, 'Invoice for {0}'.format(self.customer.cust_nm))
+        canvas.drawCentredString(width, height, f'Invoice for {self.customer}')
         canvas.drawString(inch, 0.75 * inch, "Page 1: %s" % self.pageinfo)
         canvas.restoreState()
 
@@ -76,12 +78,11 @@ class GenInvoice(object):
         canvas.restoreState()
 
     def gen_invoice_number(self):
-        current_time = datetime.now()
-        day_of_year = current_time.strftime('%y%j')
-        return day_of_year + self.customer.abrv.upper()
+        abbreviation = self.customer.abrv.upper()
+        return f'{self.day_of_year}{abbreviation}'
 
     def make(self):
-        filename = "{0}.pdf".format(self.invoice_no)
+        filename = f"{self.invoice_no}.pdf"
         config = ConfigParser()
         config.read('development.ini')
         billing_dir = config.get('app:main', 'billing.invoices_dir')
@@ -294,17 +295,24 @@ def generate_invoice(cust_id, project_id, discount=0, status='U'):
     customer = get_customer(cust_id)
     hours = get_hours(cust_id, project_id, status)
     maximum = 0
-    gen_inv = GenInvoice(customer, hours, maximum=maximum, discount=discount)
-    full_path = gen_inv.make()
+    invoice = GenInvoice(customer, hours, maximum=maximum, discount=discount)
+    full_path = invoice.make()
     print(full_path)
 
 
 if __name__ == '__main__':
-    cust_proj_map = {3: 30, 65:55}
+    cust_proj_map = {CUSTOMER_ID: 22, 3: 30, 65:55, 68:60}
     customer_id = int(sys.argv[1]) if len(sys.argv) > 1 else CUSTOMER_ID
     try:
         project_id = int(sys.argv[2]) if len(sys.argv) > 2 else cust_proj_map.get(customer_id, PROJECT_ID)
     except ValueError:
         project_id = cust_proj_map.get(customer_id, PROJECT_ID)
+
+    try:
+        amount = int(sys.argv[3])
+        generate_invoice_with_amount(customer_id, project_id, amount)
+    except (ValueError, IndexError):
+        pass
+
     status = sys.argv[-1] if sys.argv[-1] in ('U', 'B', 'P') else 'U'
     generate_invoice(cust_id=customer_id, project_id=project_id, discount=0, status=status)
