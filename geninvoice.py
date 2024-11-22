@@ -78,8 +78,7 @@ class GenInvoice(object):
         canvas.restoreState()
 
     def gen_invoice_number(self):
-        abbreviation = self.customer.abrv.upper()
-        return f'{self.day_of_year}{abbreviation}'
+        return f'{self.day_of_year}-{self.customer.abbreviation}'
 
     def make(self):
         filename = f"{self.invoice_no}.pdf"
@@ -122,7 +121,7 @@ class GenInvoice(object):
 
         # summary
         total_hours = sum([h.Hours.hrs or 0 for h in self.hours])
-        total_expenses = sum([h.Hours.amt_exp or 0 for h in self.hours])
+        total_expenses = sum([0 for h in self.hours])
         if self.maximum:
             total_amount = Decimal(self.maximum)
         else:
@@ -163,11 +162,11 @@ class GenInvoice(object):
             # positive hours means use hours, not expense
             if h.Hours.hrs and h.Hours.hrs != 0:
                 data.append((
-                    h.Hours.performed.strftime('%m/%d/%Y'),
+                    h.Hours.perform_date.strftime('%m/%d/%Y'),
                     Paragraph(
                         self._combine(h.Project.name, h.Hours.comments), self.styles["BodyText"]),
                         '{0:.2f}'.format(h.Hours.hrs),
-                        '{0:.2f}'.format(self.customer.rate * h.Hours.hrs or h.Hours.amt_exp)
+                        '{0:.2f}'.format(self.customer.rate * h.Hours.hrs)
                     )
                 )
             # no hours implies an expense rather than hours
@@ -211,25 +210,9 @@ def get_customer(cust_id=2):
     return db.query(Customer).filter(Customer.id == cust_id).first()
 
 
-def get_hours_months(cust_id=2, project_id=30, status='U'):
-    current_month = date.today().month
-
-    return (
-        db.query(Hours, Project)
-        .join(Project, Project.id == Hours.project_id)
-        .filter(Hours.cust_id == cust_id)
-        .filter(Hours.project_id == project_id)
-        .filter(Hours.billing_status == status)
-        .filter(func.month(Hours.performed) != current_month)
-        .order_by(Hours.performed, Hours.id)
-        .all()
-    )
-
-
-def get_hours(cust_id=2, project_id=30, status='U'):
+def get_hours(project_id=30, status=0):
     """
     Return a list of hours to be billed.
-    :param cust_id: int
     :param project_id: int
     :param status: one character (U=unbilled, B=billed, P=paid)
     :return:
@@ -240,11 +223,9 @@ def get_hours(cust_id=2, project_id=30, status='U'):
     return (
         db.query(Hours, Project)
         .join(Project, Project.id == Hours.project_id)
-        .filter(Hours.cust_id == cust_id)
         .filter(Hours.project_id == project_id)
-        .filter(Hours.billing_status == status)
-        #.filter(func.year(Hours.performed).in_(years_performed))
-        .order_by(Hours.performed, Hours.id)
+        .filter(Hours.status == status)
+        .order_by(Hours.perform_date, Hours.id)
         .all()
     )
 
@@ -284,7 +265,7 @@ def get_month_performed():
             pass
 
 
-def generate_invoice(cust_id, project_id, discount=0, status='U'):
+def generate_invoice(cust_id, project_id, discount=0, status=0):
     """
     Generate an invoice as a PDF document.
     :param cust_id: int
@@ -293,7 +274,7 @@ def generate_invoice(cust_id, project_id, discount=0, status='U'):
     :return: None
     """
     customer = get_customer(cust_id)
-    hours = get_hours(cust_id, project_id, status)
+    hours = get_hours(project_id, status)
     maximum = 0
     invoice = GenInvoice(customer, hours, maximum=maximum, discount=discount)
     full_path = invoice.make()
@@ -314,5 +295,4 @@ if __name__ == '__main__':
     except (ValueError, IndexError):
         pass
 
-    status = sys.argv[-1] if sys.argv[-1] in ('U', 'B', 'P') else 'U'
-    generate_invoice(cust_id=customer_id, project_id=project_id, discount=0, status=status)
+    generate_invoice(cust_id=customer_id, project_id=project_id, discount=0, status=0)
